@@ -19,16 +19,14 @@ export async function createTrip(input: CreateTripInput) {
   if (participants.length < 1)
     throw new Error("At least one participant is required");
 
-  const trip = await prisma.trip.create({
-    data: {
-      title,
-      participants: {
-        create: participants.map((p) => ({
-          name: p.name,
-          paymentInfo: p.paymentInfo || null,
-        })),
-      },
-    },
+  const trip = await prisma.trip.create({ data: { title } });
+
+  await prisma.participant.createMany({
+    data: participants.map((p) => ({
+      tripId: trip.id,
+      name: p.name,
+      paymentInfo: p.paymentInfo || null,
+    })),
   });
 
   redirect(`/trip/${trip.id}`);
@@ -57,15 +55,20 @@ export async function createBill(input: CreateBillInput) {
   if (payer.tripId !== input.tripId)
     throw new Error("Payer must be a participant of this trip");
 
-  await prisma.bill.create({
+  const bill = await prisma.bill.create({
     data: {
       title,
       tripId: input.tripId,
       payerId: input.payerId,
-      items: {
-        create: items.map((item) => ({ name: item.name, price: item.price })),
-      },
     },
+  });
+
+  await prisma.item.createMany({
+    data: items.map((item) => ({
+      billId: bill.id,
+      name: item.name,
+      price: item.price,
+    })),
   });
 
   revalidatePath(`/trip/${input.tripId}`);
