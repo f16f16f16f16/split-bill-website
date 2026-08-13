@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Trip {
+  id           String        @id @default(cuid())
+  title        String
+  createdAt    DateTime      @default(now())
+  participants Participant[]
+  bills        Bill[]
+}
+
+model Participant {
+  id          String           @id @default(cuid())
+  name        String
+  paymentInfo String?
+  paid        Boolean          @default(false)
+  paidAt      DateTime?
+  tripId      String
+  trip        Trip             @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  itemShares  ItemAssignment[]
+  billsPaid   Bill[]           @relation("BillPayer")
+}
+
+model Bill {
+  id        String      @id @default(cuid())
+  title     String
+  createdAt DateTime    @default(now())
+  tripId    String
+  trip      Trip        @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  payerId   String
+  payer     Participant @relation("BillPayer", fields: [payerId], references: [id])
+  items     Item[]
+}
+
+model Item {
+  id          String           @id @default(cuid())
+  name        String
+  price       Decimal          @db.Decimal(10, 2)
+  billId      String
+  bill        Bill             @relation(fields: [billId], references: [id], onDelete: Cascade)
+  assignments ItemAssignment[]
+}
+
+model ItemAssignment {
+  id            String      @id @default(cuid())
+  itemId        String
+  item          Item        @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, participantId])
+}
