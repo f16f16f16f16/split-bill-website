@@ -8,7 +8,7 @@ export default function LanguageSwitcher() {
   const { locale } = useI18n();
 
   return (
-    <div className="fixed top-3 right-3 z-10 flex overflow-hidden rounded-full border border-zinc-300 bg-white text-xs dark:border-zinc-700 dark:bg-zinc-900">
+    <div className="flex overflow-hidden rounded-full border border-zinc-300 bg-white text-xs dark:border-zinc-700 dark:bg-zinc-900">
       {(["en", "th"] as Locale[]).map((l) => (
         <button
           key={l}

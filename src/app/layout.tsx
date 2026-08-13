@@ -35,7 +35,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <I18nProvider locale={locale} dict={dict}>
-          <LanguageSwitcher />
+          <div className="flex justify-end border-b border-zinc-200 bg-zinc-50 px-4 py-2 dark:border-zinc-800 dark:bg-black sm:px-6">
+            <LanguageSwitcher />
+          </div>
           {children}
         </I18nProvider>
       </body>
