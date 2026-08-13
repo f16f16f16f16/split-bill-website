@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { getLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { I18nProvider } from "@/components/i18n-provider";
+import LanguageSwitcher from "@/components/language-switcher";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,18 +16,29 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Split Bill",
-  description: "Split a bill with friends and track who's paid.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = getDictionary(await getLocale());
+  return {
+    title: dict.meta.title,
+    description: dict.meta.description,
+  };
+}
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <I18nProvider locale={locale} dict={dict}>
+          <LanguageSwitcher />
+          {children}
+        </I18nProvider>
+      </body>
     </html>
   );
 }

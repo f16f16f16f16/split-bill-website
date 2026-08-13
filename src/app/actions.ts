@@ -2,7 +2,21 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getLocale, LOCALE_COOKIE } from "@/lib/i18n/locale";
+import { locales, type Locale } from "@/lib/i18n/dictionaries";
+
+export async function setLocale(locale: Locale) {
+  if (!(locales as readonly string[]).includes(locale)) return;
+  const cookieStore = await cookies();
+  cookieStore.set(LOCALE_COOKIE, locale, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+  revalidatePath("/", "layout");
+}
 
 export type CreateTripInput = {
   title: string;
@@ -10,14 +24,15 @@ export type CreateTripInput = {
 };
 
 export async function createTrip(input: CreateTripInput) {
+  const dict = getDictionary(await getLocale());
   const title = input.title.trim();
   const participants = input.participants
     .map((p) => ({ name: p.name.trim(), paymentInfo: p.paymentInfo.trim() }))
     .filter((p) => p.name.length > 0);
 
-  if (!title) throw new Error("Trip title is required");
+  if (!title) throw new Error(dict.errors.tripTitleRequired);
   if (participants.length < 1)
-    throw new Error("At least one participant is required");
+    throw new Error(dict.errors.atLeastOneParticipant);
 
   const trip = await prisma.trip.create({ data: { title } });
 
@@ -40,20 +55,21 @@ export type CreateBillInput = {
 };
 
 export async function createBill(input: CreateBillInput) {
+  const dict = getDictionary(await getLocale());
   const title = input.title.trim();
   const items = input.items
     .map((item) => ({ ...item, name: item.name.trim() }))
     .filter((item) => item.name.length > 0 && item.price > 0);
 
-  if (!title) throw new Error("Bill title is required");
-  if (!input.payerId) throw new Error("Pick who paid for this bill");
-  if (items.length < 1) throw new Error("At least one item is required");
+  if (!title) throw new Error(dict.errors.billTitleRequired);
+  if (!input.payerId) throw new Error(dict.errors.pickPayer);
+  if (items.length < 1) throw new Error(dict.errors.atLeastOneItem);
 
   const payer = await prisma.participant.findUniqueOrThrow({
     where: { id: input.payerId },
   });
   if (payer.tripId !== input.tripId)
-    throw new Error("Payer must be a participant of this trip");
+    throw new Error(dict.errors.payerMustBeParticipant);
 
   const bill = await prisma.bill.create({
     data: {

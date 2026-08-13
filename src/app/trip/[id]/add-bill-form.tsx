@@ -4,6 +4,7 @@ import { useState } from "react";
 import { unstable_rethrow } from "next/navigation";
 import { createBill } from "@/app/actions";
 import { formatCurrency } from "@/lib/format";
+import { useI18n } from "@/components/i18n-provider";
 
 type ItemDraft = { name: string; price: string };
 type ParticipantOption = { id: string; name: string };
@@ -15,6 +16,7 @@ export default function AddBillForm({
   tripId: string;
   participants: ParticipantOption[];
 }) {
+  const { dict } = useI18n();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [payerId, setPayerId] = useState("");
@@ -59,7 +61,9 @@ export default function AddBillForm({
       setOpen(false);
     } catch (err) {
       unstable_rethrow(err);
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(
+        err instanceof Error ? err.message : dict.addBill.somethingWentWrong
+      );
     } finally {
       setSubmitting(false);
     }
@@ -72,7 +76,7 @@ export default function AddBillForm({
         onClick={() => setOpen(true)}
         className="w-full rounded-xl border border-dashed border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-600 hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-100"
       >
-        + Add a bill
+        {dict.addBill.addABill}
       </button>
     );
   }
@@ -84,14 +88,14 @@ export default function AddBillForm({
     >
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
-          New bill
+          {dict.addBill.newBill}
         </h2>
         <button
           type="button"
           onClick={() => setOpen(false)}
           className="text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
         >
-          Cancel
+          {dict.addBill.cancel}
         </button>
       </div>
 
@@ -99,7 +103,7 @@ export default function AddBillForm({
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="e.g. Day 2 lunch"
+        placeholder={dict.addBill.billTitlePlaceholder}
         className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
       />
 
@@ -108,7 +112,7 @@ export default function AddBillForm({
         onChange={(e) => setPayerId(e.target.value)}
         className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
       >
-        <option value="">Who paid?</option>
+        <option value="">{dict.addBill.whoPaid}</option>
         {participants.map((p) => (
           <option key={p.id} value={p.id}>
             {p.name}
@@ -123,7 +127,7 @@ export default function AddBillForm({
               type="text"
               value={item.name}
               onChange={(e) => updateItem(idx, "name", e.target.value)}
-              placeholder="Item name"
+              placeholder={dict.addBill.itemNamePlaceholder}
               className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
             />
             <input
@@ -141,7 +145,7 @@ export default function AddBillForm({
               onClick={() => removeItem(idx)}
               disabled={items.length <= 1}
               className="shrink-0 rounded-lg px-2 py-2 text-sm text-zinc-500 hover:bg-zinc-100 disabled:opacity-30 dark:hover:bg-zinc-800"
-              aria-label="Remove item"
+              aria-label={dict.addBill.removeItem}
             >
               ✕
             </button>
@@ -152,12 +156,12 @@ export default function AddBillForm({
           onClick={addItem}
           className="self-start text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
         >
-          + Add item
+          {dict.addBill.addItem}
         </button>
       </div>
 
       <div className="flex justify-between border-t border-zinc-200 pt-3 text-sm font-semibold text-zinc-950 dark:border-zinc-800 dark:text-zinc-50">
-        <span>Total</span>
+        <span>{dict.addBill.total}</span>
         <span>{formatCurrency(total)}</span>
       </div>
 
@@ -172,7 +176,7 @@ export default function AddBillForm({
         disabled={submitting}
         className="w-full rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
       >
-        {submitting ? "Creating…" : "Create bill"}
+        {submitting ? dict.addBill.creating : dict.addBill.createBill}
       </button>
     </form>
   );

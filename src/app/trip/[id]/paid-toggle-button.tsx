@@ -1,9 +1,11 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
+import { useI18n } from "@/components/i18n-provider";
 
 export default function PaidToggleButton({ paid }: { paid: boolean }) {
   const { pending } = useFormStatus();
+  const { dict } = useI18n();
 
   return (
     <button
@@ -14,7 +16,11 @@ export default function PaidToggleButton({ paid }: { paid: boolean }) {
           : "rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
       }
     >
-      {pending ? "Saving…" : paid ? "Paid ✓" : "Mark as paid"}
+      {pending
+        ? dict.paidToggle.saving
+        : paid
+          ? dict.paidToggle.paid
+          : dict.paidToggle.markAsPaid}
     </button>
   );
 }

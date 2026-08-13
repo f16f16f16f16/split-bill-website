@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/format";
+import { getLocale } from "@/lib/i18n/locale";
+import { getDictionary, t } from "@/lib/i18n/dictionaries";
 import AddBillForm from "./add-bill-form";
 import AssignmentCheckbox from "./assignment-checkbox";
 import PaidToggleButton from "./paid-toggle-button";
@@ -23,6 +26,7 @@ type OwedLine = {
 
 export default async function TripPage(props: PageProps<"/trip/[id]">) {
   const { id } = await props.params;
+  const dict = getDictionary(await getLocale());
 
   const trip = await prisma.trip.findUnique({
     where: { id },
@@ -78,9 +82,17 @@ export default async function TripPage(props: PageProps<"/trip/[id]">) {
   return (
     <div className="flex flex-1 justify-center bg-zinc-50 px-4 py-8 dark:bg-black sm:px-6 sm:py-12">
       <main className="w-full max-w-2xl">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
-          {trip.title}
-        </h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
+            {trip.title}
+          </h1>
+          <Link
+            href="/"
+            className="shrink-0 pt-1 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+          >
+            {dict.trip.newTrip}
+          </Link>
+        </div>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
           {trip.participants.map((p) => p.name).join(", ")}
         </p>
@@ -88,7 +100,7 @@ export default async function TripPage(props: PageProps<"/trip/[id]">) {
         <div className="mt-8 flex flex-col gap-6">
           {trip.bills.length === 0 && (
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              No bills yet — add the first one below.
+              {dict.trip.noBillsYet}
             </p>
           )}
 
@@ -111,7 +123,7 @@ export default async function TripPage(props: PageProps<"/trip/[id]">) {
                   </span>
                 </div>
                 <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-                  Paid by {bill.payer.name}
+                  {dict.trip.paidBy} {bill.payer.name}
                   {bill.payer.paymentInfo ? ` — ${bill.payer.paymentInfo}` : ""}
                 </p>
                 <div className="mt-3 flex flex-col gap-4">
@@ -156,7 +168,7 @@ export default async function TripPage(props: PageProps<"/trip/[id]">) {
 
         <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 sm:p-5">
           <h2 className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
-            Who owes what
+            {dict.trip.whoOwesWhat}
           </h2>
           <div className="mt-3 flex flex-col gap-4">
             {trip.participants.map((p) => {
@@ -174,8 +186,10 @@ export default async function TripPage(props: PageProps<"/trip/[id]">) {
                       </p>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400">
                         {lines.length === 0
-                          ? "Nothing owed"
-                          : `${formatCurrency(total)} total`}
+                          ? dict.trip.nothingOwed
+                          : t(dict.trip.total, {
+                              amount: formatCurrency(total),
+                            })}
                       </p>
                     </div>
                     <form action={toggleParticipantPaid.bind(null, p.id)}>
@@ -188,7 +202,8 @@ export default async function TripPage(props: PageProps<"/trip/[id]">) {
                         <li key={line.billId} className="text-xs">
                           <div className="flex items-center justify-between gap-3 text-zinc-600 dark:text-zinc-400">
                             <span>
-                              {line.billTitle} → pay {line.payToName}
+                              {line.billTitle}{" "}
+                              {t(dict.trip.payTo, { name: line.payToName })}
                               {line.payToInfo ? ` (${line.payToInfo})` : ""}
                             </span>
                             <span className="shrink-0 font-medium text-zinc-800 dark:text-zinc-200">
@@ -217,7 +232,7 @@ export default async function TripPage(props: PageProps<"/trip/[id]">) {
             })}
           </div>
           <div className="mt-4 flex justify-between border-t border-zinc-200 pt-3 text-sm font-semibold text-zinc-950 dark:border-zinc-800 dark:text-zinc-50">
-            <span>Trip total</span>
+            <span>{dict.trip.tripTotal}</span>
             <span>{formatCurrency(grandTotal)}</span>
           </div>
         </section>
