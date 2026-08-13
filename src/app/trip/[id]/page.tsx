@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/format";
 import AddBillForm from "./add-bill-form";
 import AssignmentCheckbox from "./assignment-checkbox";
+import PaidToggleButton from "./paid-toggle-button";
 import { toggleParticipantPaid } from "@/app/actions";
 
 type OwedLine = {
@@ -170,16 +171,7 @@ export default async function TripPage(props: PageProps<"/trip/[id]">) {
                       </p>
                     </div>
                     <form action={toggleParticipantPaid.bind(null, p.id)}>
-                      <button
-                        type="submit"
-                        className={
-                          p.paid
-                            ? "rounded-full bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-200 dark:bg-green-950 dark:text-green-400"
-                            : "rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
-                        }
-                      >
-                        {p.paid ? "Paid ✓" : "Mark as paid"}
-                      </button>
+                      <PaidToggleButton paid={p.paid} />
                     </form>
                   </div>
                   {lines.length > 0 && (
