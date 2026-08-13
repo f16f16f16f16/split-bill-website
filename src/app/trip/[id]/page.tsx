@@ -6,12 +6,19 @@ import AssignmentCheckbox from "./assignment-checkbox";
 import PaidToggleButton from "./paid-toggle-button";
 import { toggleParticipantPaid } from "@/app/actions";
 
+type OwedItem = {
+  itemId: string;
+  itemName: string;
+  amount: number;
+};
+
 type OwedLine = {
   billId: string;
   billTitle: string;
   amount: number;
   payToName: string;
   payToInfo: string | null;
+  items: OwedItem[];
 };
 
 export default async function TripPage(props: PageProps<"/trip/[id]">) {
@@ -35,21 +42,21 @@ export default async function TripPage(props: PageProps<"/trip/[id]">) {
   );
 
   for (const bill of trip.bills) {
-    const shareByParticipant = new Map<string, number>();
+    const itemsByParticipant = new Map<string, OwedItem[]>();
     for (const item of bill.items) {
       const price = Number(item.price);
       const sharedCount = item.assignments.length;
       if (sharedCount === 0) continue;
       const share = price / sharedCount;
       for (const a of item.assignments) {
-        shareByParticipant.set(
-          a.participantId,
-          (shareByParticipant.get(a.participantId) ?? 0) + share
-        );
+        if (a.participantId === bill.payerId) continue;
+        const list = itemsByParticipant.get(a.participantId) ?? [];
+        list.push({ itemId: item.id, itemName: item.name, amount: share });
+        itemsByParticipant.set(a.participantId, list);
       }
     }
-    for (const [participantId, amount] of shareByParticipant) {
-      if (participantId === bill.payerId) continue;
+    for (const [participantId, items] of itemsByParticipant) {
+      const amount = items.reduce((sum, i) => sum + i.amount, 0);
       if (amount <= 0) continue;
       owedBreakdownByParticipant.get(participantId)?.push({
         billId: bill.id,
@@ -57,6 +64,7 @@ export default async function TripPage(props: PageProps<"/trip/[id]">) {
         amount,
         payToName: bill.payer.name,
         payToInfo: bill.payer.paymentInfo,
+        items,
       });
     }
   }
@@ -175,19 +183,31 @@ export default async function TripPage(props: PageProps<"/trip/[id]">) {
                     </form>
                   </div>
                   {lines.length > 0 && (
-                    <ul className="mt-2 flex flex-col gap-1">
+                    <ul className="mt-2 flex flex-col gap-2">
                       {lines.map((line) => (
-                        <li
-                          key={line.billId}
-                          className="flex items-center justify-between gap-3 text-xs text-zinc-600 dark:text-zinc-400"
-                        >
-                          <span>
-                            {line.billTitle} → pay {line.payToName}
-                            {line.payToInfo ? ` (${line.payToInfo})` : ""}
-                          </span>
-                          <span className="shrink-0 font-medium text-zinc-800 dark:text-zinc-200">
-                            {formatCurrency(line.amount)}
-                          </span>
+                        <li key={line.billId} className="text-xs">
+                          <div className="flex items-center justify-between gap-3 text-zinc-600 dark:text-zinc-400">
+                            <span>
+                              {line.billTitle} → pay {line.payToName}
+                              {line.payToInfo ? ` (${line.payToInfo})` : ""}
+                            </span>
+                            <span className="shrink-0 font-medium text-zinc-800 dark:text-zinc-200">
+                              {formatCurrency(line.amount)}
+                            </span>
+                          </div>
+                          <ul className="mt-1 flex flex-col gap-0.5 pl-3">
+                            {line.items.map((item) => (
+                              <li
+                                key={item.itemId}
+                                className="flex items-center justify-between gap-3 text-zinc-500 dark:text-zinc-500"
+                              >
+                                <span>{item.itemName}</span>
+                                <span className="shrink-0">
+                                  {formatCurrency(item.amount)}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
                         </li>
                       ))}
                     </ul>
