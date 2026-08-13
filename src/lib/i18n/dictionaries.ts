@@ -4,6 +4,7 @@ export const defaultLocale: Locale = "en";
 
 export type Dictionary = {
   meta: { title: string; description: string };
+  nav: { backToNontatech: string };
   home: {
     heading: string;
     subtitle: string;
@@ -60,6 +61,7 @@ export type Dictionary = {
 
 const dictionaries: Record<Locale, Dictionary> = {
   en: {
+    nav: { backToNontatech: "← Back to nontatech.dev" },
     meta: {
       title: "Split Bill",
       description: "Split a bill with friends and track who's paid.",
@@ -121,6 +123,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
   },
   th: {
+    nav: { backToNontatech: "← กลับไป nontatech.dev" },
     meta: {
       title: "หารบิล",
       description: "หารบิลกับเพื่อน แล้วดูว่าใครจ่ายแล้วบ้าง",

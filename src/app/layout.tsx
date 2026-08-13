@@ -35,7 +35,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <I18nProvider locale={locale} dict={dict}>
-          <div className="flex justify-end border-b border-zinc-200 bg-zinc-50 px-4 py-2 dark:border-zinc-800 dark:bg-black sm:px-6">
+          <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50 px-4 py-2 dark:border-zinc-800 dark:bg-black sm:px-6">
+            <a
+              href="https://www.nontatech.dev"
+              className="text-xs font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            >
+              {dict.nav.backToNontatech}
+            </a>
             <LanguageSwitcher />
           </div>
           {children}
