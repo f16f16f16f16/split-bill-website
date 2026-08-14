@@ -1,36 +1,20 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Split Bill
 
-## Getting Started
+Split trip expenses with friends. Create a trip, add the people going, then add a bill for each day or expense. Everyone with the link can check off which items were theirs and mark themselves as paid — no accounts needed.
 
-First, run the development server:
+Live at [nontatech.dev/labs/split-bill](https://www.nontatech.dev/labs/split-bill).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Trips** hold a shared list of participants and any number of bills (e.g. one per day)
+- **Bills** have line items with prices; anyone checks off which items were theirs directly on the page
+- Each bill records who paid for it, with optional payment info (bank/PromptPay/etc.) so others know how to pay them back
+- "Who owes what" breaks each person's total down per bill and per item
+- English and Thai, switchable, defaults to English
+- Mobile-first responsive layout
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js](https://nextjs.org) (App Router) + TypeScript + Tailwind CSS
+- [Prisma](https://www.prisma.io) + [Neon](https://neon.tech) (Postgres), via Neon's serverless driver adapter
+- Deployed on Vercel, proxied under [nontatech.dev](https://www.nontatech.dev)'s `/labs/split-bill` path
